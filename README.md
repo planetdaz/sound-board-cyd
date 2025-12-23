@@ -48,16 +48,17 @@ This project supports **two CYD board variants** with automatic configuration vi
 +------------------------------------------+
 |  Sound Board                    [+][-] 5 |
 +------------------------------------------+
-|  [ 0001 ]  [ 0002 ]  [ 0003 ]            |
-|  [ 0004 ]  [ 0005 ]  [ 0006 ]            |
-|  [ 0007 ]  [ 0008 ]  [ 0009 ]            |
+|  [ Achievement Bell                    ] |
+|  [ Alert Bells Echo                    ] |
+|  [ Arcade Score Interface              ] |
+|  [ Attention Bell Ding                 ] |
 |                                          |
 |              [▲ scroll ▼]                |
 +------------------------------------------+
 ```
 
 - **Title bar:** App name with volume controls (+ / -) and current level
-- **Button grid:** Scrollable list of sound file buttons
+- **Button list:** Single column of scrollable sound buttons with full titles
 - **Scroll controls:** Navigate through available sounds if more than fit on screen
 
 ## Operation
