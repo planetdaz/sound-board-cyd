@@ -168,6 +168,7 @@ void playChime();
 void playLaser();
 void playTone(int freqHz, int durationMs, int vol);
 bool playWavFile(const char* filename);
+void reinitTouch();
 int getTouchedButton(int touchX, int touchY);
 bool initSDCard();
 bool parseIndexCSV();
@@ -279,10 +280,13 @@ void setup() {
   }
 
   // Initialize audio output using ESP32 internal DAC
-  // Internal DAC uses GPIO25 (left) and GPIO26 (right)
+  // Internal DAC uses GPIO25 (left/channel 1) and GPIO26 (right/channel 2)
+  // NOTE: Resistive board uses GPIO25 for touch SPI clock, so we must use mono
+  // and output only to the right channel (GPIO26) to avoid conflict
   out = new AudioOutputI2S(0, AudioOutputI2S::INTERNAL_DAC);
+  out->SetOutputModeMono(true);  // Use mono mode to avoid GPIO25 conflict
   out->SetGain(0.5);  // Start at 50% gain
-  Serial.println("Audio I2S output initialized (internal DAC)");
+  Serial.println("Audio I2S output initialized (internal DAC, mono on GPIO26)");
 
   // Draw the main UI
   drawUI();
@@ -344,6 +348,22 @@ bool readTouch(int &screenX, int &screenY) {
 #endif
 }
 
+// Reinitialize touch controller after audio playback
+// This is needed on the resistive board because I2S internal DAC uses GPIO25
+// which conflicts with the touch SPI clock
+void reinitTouch() {
+#if defined(BOARD_CYD_RESISTIVE)
+  // Reinitialize the HSPI bus for touch
+  touchSPI.end();
+  delay(10);
+  touchSPI.begin(TOUCH_SCLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+  ts.begin(touchSPI);
+  ts.setRotation(1);
+  Serial.println("Touch controller reinitialized");
+#endif
+  // Capacitive touch uses I2C, no conflict with I2S DAC
+}
+
 // ===== MAIN LOOP =====
 void loop() {
   // Handle audio playback - must be called frequently!
@@ -354,17 +374,20 @@ void loop() {
         wav->stop();
         audioPlaying = false;
         resetPlayingButton();
+        reinitTouch();  // Reinit touch after audio (I2S may have affected GPIO25)
         Serial.println("WAV playback stopped early (avoiding buzz)");
       } else if (!wav->loop()) {
         // Playback finished naturally
         wav->stop();
         audioPlaying = false;
         resetPlayingButton();
+        reinitTouch();  // Reinit touch after audio (I2S may have affected GPIO25)
         Serial.println("WAV playback complete");
       }
     } else {
       audioPlaying = false;
       resetPlayingButton();
+      reinitTouch();  // Reinit touch after audio
     }
   }
 
