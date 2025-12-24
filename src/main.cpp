@@ -193,6 +193,11 @@ void setup() {
   pinMode(SPEAKER_EN_PIN, OUTPUT);
   digitalWrite(SPEAKER_EN_PIN, LOW);  // Enable speaker amplifier (active LOW)
   Serial.println("Speaker amplifier enabled (GPIO 4 = LOW)");
+#elif defined(BOARD_CYD_CAPACITIVE)
+  // GPIO 4 is RGB LED Red on capacitive board - set HIGH to keep LED off
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
+  Serial.println("GPIO 4 set HIGH (LED off)");
 #endif
 
   // Initialize display
