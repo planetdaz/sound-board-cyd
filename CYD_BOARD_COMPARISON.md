@@ -191,7 +191,7 @@ board_build.filesystem = littlefs
 #define TOUCH_SDA 33
 #define TOUCH_SCL 32
 #define TOUCH_RST 25
-#define TOUCH_INT 36  // Not used - polling instead
+#define TOUCH_INT 21  // Not used - polling instead
 
 // Backlight
 #define TFT_BACKLIGHT 27
@@ -468,3 +468,4 @@ CST816S should appear at address **0x15**.
 - [Sunton Board Definitions](https://github.com/rzeldent/platformio-espressif32-sunton) - PlatformIO board configs
 - [TFT_eSPI Library](https://github.com/Bodmer/TFT_eSPI) - Display driver
 - [CST816S Datasheet](https://github.com/fbiego/CST816S) - Touch controller reference
+

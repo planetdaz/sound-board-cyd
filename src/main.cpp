@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <SPI.h>
+#include <Wire.h>  // Must be included early, before ESP8266Audio
 #include <TFT_eSPI.h>
 #include <SD.h>
 #include <FS.h>
@@ -43,7 +44,7 @@
 #elif defined(BOARD_CYD_CAPACITIVE)
   // JC2432W328C (Guition) with CST816S Capacitive Touch (I2C)
   // Official pin config from: https://github.com/rzeldent/platformio-espressif32-sunton
-  #include <Wire.h>
+  // Wire.h already included above
   #define TOUCH_SDA 33
   #define TOUCH_SCL 32
   #define TOUCH_INT 21   // Note: NOT 36!
@@ -188,17 +189,29 @@ void setup() {
   digitalWrite(TFT_BACKLIGHT, HIGH);
   Serial.println("Backlight ON");
 
-  // Initialize speaker amplifier (resistive board has enable pin)
+  // Initialize audio output pin and turn off RGB LEDs
+  // Both boards have RGB LEDs on GPIOs 4, 16, 17 (active LOW, so HIGH = off)
+  // Resistive board: GPIO 4 = speaker enable (active LOW), GPIO 22 = red LED
+  // Capacitive board: GPIO 4 = red LED (no speaker enable needed)
 #if defined(BOARD_CYD_RESISTIVE)
   pinMode(SPEAKER_EN_PIN, OUTPUT);
   digitalWrite(SPEAKER_EN_PIN, LOW);  // Enable speaker amplifier (active LOW)
   Serial.println("Speaker amplifier enabled (GPIO 4 = LOW)");
+  // Turn off RGB LEDs: R=22, G=16, B=17 (HIGH = off)
+  pinMode(22, OUTPUT);
+  digitalWrite(22, HIGH);
 #elif defined(BOARD_CYD_CAPACITIVE)
   // GPIO 4 is RGB LED Red on capacitive board - set HIGH to keep LED off
   pinMode(4, OUTPUT);
   digitalWrite(4, HIGH);
-  Serial.println("GPIO 4 set HIGH (LED off)");
+  Serial.println("GPIO 4 set HIGH (Red LED off)");
 #endif
+  // Turn off green and blue LEDs (same pins on both boards)
+  pinMode(16, OUTPUT);
+  digitalWrite(16, HIGH);
+  pinMode(17, OUTPUT);
+  digitalWrite(17, HIGH);
+  Serial.println("RGB LEDs turned off (GPIOs 16, 17 = HIGH)");
 
   // Initialize display
   tft.init();
